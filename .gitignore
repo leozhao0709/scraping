@@ -2,3 +2,7 @@
 scrap_venv/*
 
 *.pyc
+
+.idea/*
+
+.idea/vcs.xml
