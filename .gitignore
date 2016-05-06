@@ -6,3 +6,5 @@ scrap_venv/*
 .idea/*
 
 .idea/vcs.xml
+
+*.json
