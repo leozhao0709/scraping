@@ -8,3 +8,7 @@ scrap_venv/*
 .idea/vcs.xml
 
 *.json
+
+*.jl
+
+*.csv

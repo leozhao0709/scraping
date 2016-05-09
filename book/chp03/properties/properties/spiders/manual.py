@@ -6,18 +6,28 @@ import urlparse
 from properties.items import PropertiesItem
 from scrapy.loader import ItemLoader
 from scrapy.loader.processors import MapCompose, Join
+from scrapy.http import Request
 
 
 class BasicSpider(scrapy.Spider):
-	name = "basic"
+	name = "manual"
 	allowed_domains = ["localhost"]
 	start_urls = (
-		'http://localhost:9312/properties/property_000000.html',
-		'http://localhost:9312/properties/property_000001.html',
-		'http://localhost:9312/properties/property_000003.html',
+		'http://localhost:9312/properties/index_00000.html',
 	)
 
 	def parse(self, response):
+		# Get the next index URLs and yield Requests
+		next_selector = response.xpath('//*[contains(@class, "next")]//@href')
+		for url in next_selector.extract():
+			yield Request(urlparse.urljoin(response.url, url))
+
+		# Get item URLs and yield Requests
+		item_selector = response.xpath('//*[@itemprop="url"]/@href')
+		for url in item_selector.extract():
+			yield Request(urlparse.urljoin(response.url, url), callback=self.parse_item)
+
+	def parse_item(self, response):
 		"""
 		This function parses a property page.
 

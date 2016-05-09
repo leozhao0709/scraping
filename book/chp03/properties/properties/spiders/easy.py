@@ -1,23 +1,29 @@
 # -*- coding: utf-8 -*-
 import socket
+
 import datetime
-import scrapy
 import urlparse
-from properties.items import PropertiesItem
+
+import scrapy
+from scrapy.linkextractors import LinkExtractor
 from scrapy.loader import ItemLoader
 from scrapy.loader.processors import MapCompose, Join
+from scrapy.spiders import CrawlSpider, Rule
+
+from properties.items import PropertiesItem
 
 
-class BasicSpider(scrapy.Spider):
-	name = "basic"
-	allowed_domains = ["localhost"]
-	start_urls = (
-		'http://localhost:9312/properties/property_000000.html',
-		'http://localhost:9312/properties/property_000001.html',
-		'http://localhost:9312/properties/property_000003.html',
+class EasySpider(CrawlSpider):
+	name = 'easy'
+	allowed_domains = ['localhost']
+	start_urls = ['http://localhost:9312/']
+
+	rules = (
+		Rule(LinkExtractor(restrict_xpaths='//*[contains(@class, "next")]')),
+		Rule(LinkExtractor(restrict_xpaths='//*[@itemprop="url"]'), callback='parse_item'),
 	)
 
-	def parse(self, response):
+	def parse_item(self, response):
 		"""
 		This function parses a property page.
 
