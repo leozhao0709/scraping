@@ -22,8 +22,9 @@ class BasicSpider(scrapy.Spider):
 		js = json.loads(response.body)
 		for item in js:
 			id = item["id"]
+			title = item["title"]
 			url = base_url + "property_%06d.html" % id
-			yield Request(url, callback=self.parse_item)
+			yield Request(url, meta={"title": title}, callback=self.parse_item)
 
 	def parse_item(self, response):
 		"""
@@ -35,7 +36,7 @@ class BasicSpider(scrapy.Spider):
 		@scrapes url project spider server date
 		"""
 		l = ItemLoader(item=PropertiesItem(), response=response)
-		l.add_xpath('title', '//*[@itemprop="name"][1]/text()', MapCompose(unicode.strip, unicode.title))
+		# l.add_xpath('title', '//*[@itemprop="name"][1]/text()', MapCompose(unicode.strip, unicode.title))
 		l.add_xpath('price', '//*[@itemprop="price"][1]/text()', MapCompose(lambda i: i.replace(',', ''), float),
 					re='[,.0-9]+')
 		l.add_xpath('description', '//*[@itemprop="description"][1]/text()', MapCompose(unicode.strip), Join())
@@ -49,4 +50,6 @@ class BasicSpider(scrapy.Spider):
 		l.add_value('spider', self.name)
 		l.add_value('server', socket.gethostname())
 		l.add_value('date', datetime.datetime.now())
+
+		l.add_value('title', response.meta['title'], MapCompose(unicode.strip, unicode.title))
 		return l.load_item()
