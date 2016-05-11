@@ -23,7 +23,7 @@ class BasicSpider(scrapy.Spider):
 			yield Request(urlparse.urljoin(response.url, url))
 
 		# Get item URLs and yield Requests
-		selectors = response.xpath('//*[@itemprop="http://schema.org/Product"]')
+		selectors = response.xpath('//*[@itemtype="http://schema.org/Product"]')
 		for selector in selectors:
 			yield self.parse_item(selector, response)
 
@@ -41,7 +41,7 @@ class BasicSpider(scrapy.Spider):
 		l.add_xpath('price', './/*[@itemprop="price"][1]/text()', MapCompose(lambda i: i.replace(',', ''), float),
 					re='[,.0-9]+')
 		l.add_xpath('description', './/*[@itemprop="description"][1]/text()', MapCompose(unicode.strip), Join())
-		l.add_xpath('address', './/*[@itemtype="http://schema.org/Place"][1]/text()', MapCompose(unicode.strip))
+		l.add_xpath('address', './/*[@itemtype="http://schema.org/Place"][1]/*/text()', MapCompose(unicode.strip))
 
 		make_url = lambda i: urlparse.urljoin(response.url, i)
 		l.add_xpath('image_urls', './/*[@itemprop="image"][1]/@src',
