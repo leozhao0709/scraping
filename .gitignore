@@ -12,3 +12,5 @@ scrap_venv/*
 *.jl
 
 *.csv
+
+*.jpg
