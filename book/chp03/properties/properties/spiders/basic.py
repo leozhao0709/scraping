@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 import socket
 import datetime
 import scrapy
@@ -6,6 +7,10 @@ import urlparse
 from properties.items import PropertiesItem
 from scrapy.loader import ItemLoader
 from scrapy.loader.processors import MapCompose, Join
+from scrapy.xlib.pydispatch import dispatcher
+from scrapy import signals
+from scrapy.mail import MailSender
+from properties.emailsettings import emailSettings
 
 
 class BasicSpider(scrapy.Spider):
@@ -16,6 +21,10 @@ class BasicSpider(scrapy.Spider):
 		'http://localhost:9312/properties/property_000001.html',
 		'http://localhost:9312/properties/property_000003.html',
 	)
+
+	def __init__(self):
+		super(BasicSpider, self).__init__()
+		dispatcher.connect(self.spider_closed, signals.spider_closed)
 
 	def parse(self, response):
 		"""
@@ -42,3 +51,12 @@ class BasicSpider(scrapy.Spider):
 		l.add_value('server', socket.gethostname())
 		l.add_value('date', datetime.datetime.now())
 		return l.load_item()
+
+	def spider_closed(self, spider):
+		if spider is not self:
+			return
+		print "spider finish"
+		# mailer = MailSender(mailfrom="stockScrapy", smtphost="smtp.googlemail.com", smtpport=587,
+		# 					smtpuser=os.environ.get('MAIL_USERNAME'), smtppass=os.environ.get('MAIL_PASSWORD'))
+		mailer = MailSender.from_settings(emailSettings())
+		mailer.send(to=["zhao434@usc.edu"], subject='spider finish', body="finish spider", cc=['leizhaotest@126.com'])

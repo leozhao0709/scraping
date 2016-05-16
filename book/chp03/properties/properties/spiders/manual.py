@@ -7,6 +7,7 @@ from properties.items import PropertiesItem
 from scrapy.loader import ItemLoader
 from scrapy.loader.processors import MapCompose, Join
 from scrapy.http import Request
+from properties import settings
 
 
 class BasicSpider(scrapy.Spider):
